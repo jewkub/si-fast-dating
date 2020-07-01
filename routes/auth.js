@@ -1,3 +1,4 @@
+// require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user.js');
@@ -18,8 +19,6 @@ router.use(session({
   resave: true */
 }));
 
-router.use(flash());
-
 // Passport init
 router.use(passport.initialize());
 router.use(passport.session());
@@ -27,7 +26,7 @@ router.use(passport.session());
 passport.use(new GoogleStrategy({
 	clientID: process.env.GOOGLE_CLIENT_ID,
 	clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-	callbackURL: "https://si-fast-dating.el.r.appspot.com/auth/google/callback"
+	callbackURL: `${process.env.CALLBACK_URL || 'https://si-fast-dating.el.r.appspot.com'}/auth/google/callback`
 }, function(accessToken, refreshToken, profile, cb) {
 	// In this example, the user's Facebook profile is supplied as the user
 	// record.  In a production-quality application, the Facebook profile should
@@ -37,7 +36,14 @@ passport.use(new GoogleStrategy({
 	
 	// console.log('profile = ');
 	// console.log(profile);
-	return cb(null, profile);
+  if (profile && 
+    profile.emails && 
+    profile.emails[0] && 
+    profile.emails[0].value && 
+    profile.emails[0].value.split('@') &&
+    profile.emails[0].value.split('@')[1] == 'student.mahidol.edu'
+  ) return cb(null, profile);
+	return cb(new Error('mail not mahidol'), {});
 }));
 
 passport.serializeUser(function(user, cb) {
@@ -51,6 +57,7 @@ passport.deserializeUser(function(obj, cb) {
 // Endpoint to login
 router.get('/login',
   passport.authenticate('google', {
+    hd: 'student.mahidol.edu',
 		scope: ['profile', 'email'],
     successRedirect: '/',
     failureRedirect: '/error',
@@ -62,15 +69,10 @@ router.get('/login',
 router.get('/auth/google/callback',
 	passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {
+    // console.log(req.user);
     res.redirect('/');
   }
 );
-
-// Endpoint to get current user
-router.get('/user', function(req, res){
-	// console.log(req.user);
-  res.json(req.user || {id: null});
-});
 
 // Endpoint to logout
 router.get('/logout', function(req, res){

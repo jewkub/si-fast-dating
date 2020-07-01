@@ -11,6 +11,7 @@ const bodyParser = require('body-parser');
 const port = +process.env.PORT || 8080, ip = process.env.IP || '0.0.0.0';
 
 const passport = require('passport');
+const flash = require('connect-flash');
 
 (async () => {
   await nextApp.prepare();
@@ -23,21 +24,21 @@ const passport = require('passport');
   // parse application/json
   app.use(bodyParser.json());
 
+  app.use(flash());
+
   app.use('/', require('./routes/auth.js'));
+  app.use('/', require('./routes/data.js'));
+  app.use('/', require('./routes/activity.js'));
 
   app.get('/', async (req, res, next) => {
-    // console.log(req.user);
-    // if (!req.user) res.redirect('/login');
-    nextApp.render(req, res, '/index');
+    if (!req.user || !req.user.id) return res.redirect('/login');
+    res.sendFile(__dirname + '/public/html/index.html');
+    // nextApp.render(req, res, '/index');
   });
 
   app.get('/error', (req, res) => {
-    res.send('error');
+    res.send('login error');
   });
-
-  /* app.use('/', require('./routes/cron.js'));
-  app.use('/', require('./routes/webhook.js'));
-  app.use('/', require('./routes/visualize.js')); */
   app.get('*', (req, res) => nextApp.getRequestHandler()(req, res));
 
   app.use((err, req, res, next) => {

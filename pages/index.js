@@ -10,7 +10,7 @@ class Main extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      user: {id: null}
+      user: null
     }
   }
 
@@ -23,12 +23,33 @@ class Main extends React.Component {
   }
   
   render() {
+    if (!this.state.user) return (<div>Loading...</div>);
     if (!this.state.user.id) return (
       <div>please <a href="/login">login</a> first</div>
     );
     return (
       <>
-        <h2>Test</h2>
+        
+        <div style={{position: 'absolute', bottom: 0, width: '100%'}}>
+          <div className="col" style={{margin: 0, padding: 0}}>
+            <div className="list-group list-group-horizontal" id="list-tab" role="tablist" style={{height: '10vh', width: '100%'}}>
+              <a className="list-group-item list-group-item-action active" id="list-score-list" data-toggle="list" href="#list-score" role="tab"><img src="https://storage.googleapis.com/simc-web.appspot.com/public/web/scoreboard/user.png" alt="score"/></a>
+              <a className="list-group-item list-group-item-action" id="list-mission-list" data-toggle="list" href="#list-mission" role="tab"><img src="https://storage.googleapis.com/simc-web.appspot.com/public/web/scoreboard/mission.png" alt="mission"/></a>
+              <a className="list-group-item list-group-item-action" id="list-board-list" data-toggle="list" href="#list-board" role="tab"><img src="https://storage.googleapis.com/simc-web.appspot.com/public/web/scoreboard/board.png" alt="board"/></a>
+            </div>
+          </div>
+        </div>
+
+        <div className="tab-content">
+          <div className="tab-pane active" id="list-score" role="tabpanel">..score.</div>
+          <div className="tab-pane" id="list-mission" role="tabpanel">.mission..</div>
+          <div className="tab-pane" id="list-board" role="tabpanel">..board.</div>
+        </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossOrigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js" integrity="sha256-fTuUgtT7O2rqoImwjrhDgbXTKUwyxxujIMRIK7TbuNU=" crossOrigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha256-CjSoeELFOcH0/uxWu6mC/Vlrc1AARqbm/jiiImDGV3s=" crossOrigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.js" integrity="sha256-7OUNnq6tbF4510dkZHCRccvQfRlV3lPpBTJEljINxao=" crossOrigin="anonymous"></script>
       </>
     );
   }
@@ -43,12 +64,14 @@ class App extends React.Component {
     return (
       <>
         <Head>
-          <meta charSet="utf-8"/>
-          <title>Title</title>
-          <meta name="description" content=""/>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+          <title>SI Fast Dating 💖</title>
+          <link rel="stylesheet" type="text/css" href="css/scoreboard-sass.css"/>
+          <link rel="stylesheet" type="text/css" href="css/index.css"/>
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.css" integrity="sha256-2bAj1LMT7CXUYUwuEnqqooPb1W0Sw0uKMsqNH0HwMa4=" crossorigin="anonymous" />
         </Head>
         <Main
-          
+
         />
       </>
     )
