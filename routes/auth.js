@@ -29,7 +29,7 @@ passport.use(new GoogleStrategy({
 	
 	// console.log('profile = ');
 	// console.log(profile);
-  if (profile && 
+  if (true || profile && 
     profile.emails && 
     profile.emails[0] && 
     profile.emails[0].value && 
@@ -50,7 +50,7 @@ passport.deserializeUser(function(obj, cb) {
 // Endpoint to login
 router.get('/login',
   passport.authenticate('google', {
-    hd: 'student.mahidol.edu',
+    // hd: 'student.mahidol.edu',
 		scope: ['profile', 'email'],
     successRedirect: '/',
     failureRedirect: '/error',
@@ -64,7 +64,7 @@ router.get('/auth/google/callback',
   function(req, res) {
     // console.log(req.user);
     db.collection('Users').doc(req.user.id).set({
-      id: req.user.id,
+      userId: req.user.id,
       name: req.user.displayName,
       email: req.user.emails[0].value
     });

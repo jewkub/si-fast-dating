@@ -78,6 +78,31 @@
       </div>
     </div>
   </div>
+  <div class="modal fade" id="manage-modal" tabindex="-1" role="dialog" aria-labelledby="manageModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="manageModalLabel">Manage activity</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <h5>รายละเอียดกิจกรรม</h5>
+          <ul id="manage-detail">
+            
+          </ul>
+        </div>
+        <div class="modal-footer">
+          <form id="manage-form" method="post">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" id="manage-cancel" class="btn btn-danger">Cancel activity</button>
+            <button type="submit" id="manage-finish" class="btn btn-success">Finish activity</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="container-fluid">
   <br>
@@ -106,37 +131,63 @@
             <h2>Create my activity</h2>
             <form method="post" action="/activity/create">
               <div class="form-group">
-                <label for="activity-name">ชื่อกิจกรรม</label>
-                <input type="text" class="form-control" id="activity-name" name="name" placeholder="ชื่อกิจกรรม">
+                <div class="row">
+                  <label class="col-auto col-form-label" for="activity-name">ชื่อกิจกรรม</label>
+                  <input type="text" class="form-control col" id="activity-name" name="name" placeholder="ชื่อกิจกรรม" required>
+                </div>
               </div>
               <div class="form-group">
-                <label for="activity-detail">รายละเอียด</label>
-                <input type="text" class="form-control" id="activity-detail" name="detail" placeholder="รายละเอียด">
+                <div class="form-row">
+                  <div class="col">
+                    <label for="activity-detail">รายละเอียด</label>
+                    <textarea class="form-control" id="activity-detail" name="detail" placeholder="รายละเอียด"></textarea>
+                  </div>
+                </div>
               </div>
               <div class="form-group">
-                <label for="activity-place">สถานที่</label>
-                <input type="text" class="form-control" id="activity-place" name="place" placeholder="สถานที่">
+                <div class="form-row">
+                  <div class="col">
+                    <label for="activity-place">สถานที่</label>
+                    <input type="text" class="form-control" id="activity-place" name="place" placeholder="สถานที่" required>
+                  </div>
+                  <div class="col">
+                    <label for="activity-amount">จำนวนคน</label>
+                    <input type="text" class="form-control" id="activity-amount" name="amount" placeholder="จำนวนคน" required>
+                  </div>
+                </div>
               </div>
               <div class="form-group">
-                <label for="activity-date">วันเวลา</label>
-                <input type="text" class="form-control" id="activity-date" name="date" placeholder="วันเวลา">
+                <div class="form-row">
+                  <div class="col">
+                    <label for="activity-date">วัน</label>
+                    <input type="date" class="form-control" id="activity-date" name="date" placeholder="วันเวลา" required>
+                  </div>
+                  <div class="col">
+                      <label for="activity-time">เวลา</label>
+                      <input type="time" class="form-control" id="activity-time" name="time" placeholder="วันเวลา" required>
+                  </div>
+                </div>
               </div>
               <div class="form-group">
-                <label for="activity-amount">จำนวนคน</label>
-                <input type="text" class="form-control" id="activity-amount" name="amount" placeholder="จำนวนคน">
+                <div class="form-row">
+                  <div class="col">
+                    <label for="activity-extra">เพิ่มเติม</label>
+                    <input type="text" class="form-control" id="activity-extra" name="extra" placeholder="เพิ่มเติม">
+                  </div>
+                </div>
               </div>
               <div class="form-group">
-                <label for="activity-extra">เพิ่มเติม</label>
-                <input type="text" class="form-control" id="activity-extra" name="extra" placeholder="เพิ่มเติม">
-              </div>
-              <div class="form-group">
-                <label for="activity-category">หมวดหมู่</label>
-                <select class="form-control" id="activity-category" name="category">
-                  <option>กีฬา</option>
-                  <option>เล่น</option>
-                  <option>กิน</option>
-                  <option>จีบ</option>
-                </select>
+                <div class="form-row">
+                  <div class="col">
+                    <label for="activity-category">หมวดหมู่</label>
+                    <select class="form-control" id="activity-category" name="category">
+                      <option>กีฬา</option>
+                      <option>เล่น</option>
+                      <option>กิน</option>
+                      <option>จีบ</option>
+                    </select>
+                  </div>
+                </div>
               </div>
               <button type="submit" class="btn btn-primary">Create</button>
             </form>
@@ -175,13 +226,13 @@
                 <div class="card-header" id="headingTwo">
                   <h5 class="mb-0">
                     <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                      Finished activities
+                      Closed activities
                     </button>
                   </h5>
                 </div>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
                   <div class="card-body">
-                    <ul class="list-group" id="finished-list">
+                    <ul class="list-group" id="closed-list">
                       N/A
                     </ul>
                   </div>
@@ -211,19 +262,49 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.js" integrity="sha256-7OUNnq6tbF4510dkZHCRccvQfRlV3lPpBTJEljINxao=" crossorigin="anonymous"></script>
   <script>
     let userId;
+    const isActive = {
+      open: true,
+      closed: true,
+      cancelled: false,
+      finished: false,
+    }
     let joinRequest = async id => {
       $('#join-form').attr('action', '/activity/join/' + id);
-      // $('#join-id').val(id);
-      let data = await $.get('/activity/join/' + id);
-      console.log(data);
+
       $('#join-list').empty();
       $('#join-submit').removeAttr('disabled');
+      $('#join-submit').hide();
+
+      $('#join-modal').modal('show');
+
+      let data = await $.get('/activity/join/' + id);
+      console.log(data);
       data.forEach(e => {
         $('#join-list').append('<li>' + e.name + '</li>');
-        if (e.id == userId) $('#join-submit').attr('disabled', '');
+        if (e.userId == userId) $('#join-submit').attr('disabled', '');
       });
-      $('#join-modal').modal('show');
+      $('#join-submit').show();
     }
+
+    let manageRequest = async id => {
+      // $('#manage-form').attr('action', '/profile/manage/' + id);
+      $('#manage-cancel').attr('formaction', '/profile/manage/' + id + '/cancel');
+      $('#manage-finish').attr('formaction', '/profile/manage/' + id + '/finish');
+      $('#manage-detail').empty();
+      $("#manage-cancel, #manage-finish").removeAttr('disabled');
+      $("#manage-cancel, #manage-finish").hide();
+
+      $('#manage-modal').modal('show');
+      let data = await $.get('/profile/manage/' + id);
+
+      if (!isActive[data.status]) $("#manage-cancel, #manage-finish").attr('disabled', '');
+      for (let key in data) {
+        $('#manage-detail').append(`<li>${key}: ${data[key]}</li>`);
+      }
+
+      $("#manage-cancel, #manage-finish").show();
+    }
+
     $(() => {
       $.get('/flash/success', async data => {
         // console.log(data);
@@ -235,20 +316,23 @@
       $.get('/profile', data => {
         $('#profile-name').text(data.name);
         $('#profile-email').text(data.email);
-        userId = data.id;
+        userId = data.userId;
       });
 
-      $.get('/profile/activity/active', data => {
+      $.get('/profile/activity', data => {
         // console.log(data);
         $('#active-list').empty();
+        $('#closed-list').empty();
         data.forEach(e => {
-          $('#active-list').append(`<li class="list-group-item">${e.name}</li>`);
+          if (isActive[e.status]) $('#active-list').append(`<li class="list-group-item" onclick="manageRequest('${e.id}');">${e.name}</li>`);
+          else $('#closed-list').append(`<li class="list-group-item" onclick="manageRequest('${e.id}');">${e.name}</li>`);
         });
       });
 
       $.get('/activity/get', data => {
         $('#activity-table').empty();
         data.forEach(e => {
+          if (!isActive[e.status]) return ;
           $('#activity-table').append(`<tr onclick="joinRequest('${e.id}')"><td>${e.name}</td><td>${e.owner}</td><td>${e.detail}</td><td>${e.place}</td><td>${e.date}</td><td>${e.amount}</td><td>${e.extra}</td><td>${e.category}</td></tr>`);
         });
       });
