@@ -1,23 +1,16 @@
-// require('dotenv').config();
+const { name: projectId } = require('../package.json');
+
 const express = require('express');
 const router = express.Router();
-const User = require('../models/user.js');
+// const User = require('../models/user.js');
 
-const session = require('cookie-session');
-const flash = require('connect-flash');
+const Firestore = require('@google-cloud/firestore');
+const db = new Firestore({
+  projectId,
+});
 
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-
-router.use(session({
-  name: 'session',
-  secret: process.env.SESSION_SECRET,
-  cookie: {
-    expires: new Date(2147483647000) // Tue, 19 Jan 2038 03:14:07 GMT
-  },
-  /* saveUninitialized: false,
-  resave: true */
-}));
 
 // Passport init
 router.use(passport.initialize());
@@ -70,6 +63,11 @@ router.get('/auth/google/callback',
 	passport.authenticate('google', { failureRedirect: '/login' }),
   function(req, res) {
     // console.log(req.user);
+    db.collection('Users').doc(req.user.id).set({
+      id: req.user.id,
+      name: req.user.displayName,
+      email: req.user.emails[0].value
+    });
     res.redirect('/');
   }
 );

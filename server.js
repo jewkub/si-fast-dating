@@ -11,6 +11,7 @@ const bodyParser = require('body-parser');
 const port = +process.env.PORT || 8080, ip = process.env.IP || '0.0.0.0';
 
 const passport = require('passport');
+const session = require('cookie-session');
 const flash = require('connect-flash');
 
 (async () => {
@@ -24,10 +25,24 @@ const flash = require('connect-flash');
   // parse application/json
   app.use(bodyParser.json());
 
+  app.use(session({
+    name: 'session',
+    secret: process.env.SESSION_SECRET,
+    cookie: {
+      expires: new Date(2147483647000) // Tue, 19 Jan 2038 03:14:07 GMT
+    },
+    /* saveUninitialized: false,
+    resave: true */
+  }));
+
   app.use(flash());
+  app.get('/flash/:event', async (req, res, next) => {
+    let message = req.flash(req.params.event);
+    res.json(message);
+  });
 
   app.use('/', require('./routes/auth.js'));
-  app.use('/', require('./routes/data.js'));
+  app.use('/', require('./routes/profile.js'));
   app.use('/', require('./routes/activity.js'));
 
   app.get('/', async (req, res, next) => {
