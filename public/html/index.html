@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +14,11 @@
       font-family: sukhumvit;
       src: url('/font/sukhumvit-set/SukhumvitSet-Bold.ttf');
       font-weight: bold;
+    }
+
+    body {
+      font-family: sukhumvit;
+      font-size: 1.1em;
     }
 
     .container-fluid {
@@ -87,19 +93,21 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
-          <h5>รายละเอียดกิจกรรม</h5>
-          <ul id="manage-detail">
-            
-          </ul>
-        </div>
-        <div class="modal-footer">
-          <form id="manage-form" method="post">
+        <form id="manage-form" method="post">
+          <div class="modal-body">
+            <h5>รายละเอียดกิจกรรม</h5>
+            <ul id="manage-detail"></ul>
+            <div id="manage-rate">
+              <h5>ให้คะแนน</h5>
+              <span>กำลังทำ</span>
+            </div>
+          </div>
+          <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             <button type="submit" id="manage-cancel" class="btn btn-danger">Cancel activity</button>
             <button type="submit" id="manage-finish" class="btn btn-success">Finish activity</button>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -309,6 +317,7 @@
       $('#manage-detail').empty();
       $("#manage-cancel, #manage-finish").removeAttr('disabled');
       $("#manage-cancel, #manage-finish").hide();
+      $('#manage-rate').hide();
 
       $('#manage-modal').modal('show');
       let data = await $.get('/profile/manage/' + id);
@@ -318,6 +327,9 @@
       if (moment().isBefore(moment(data.date))) $('#manage-finish').attr('disabled', '');
       for (let key in data) {
         $('#manage-detail').append(`<li>${key}: ${data[key]}</li>`);
+      }
+      if (!isActive[data.status]) {
+        $('#manage-rate').show();
       }
 
       $('#manage-cancel, #manage-finish').filter(':not([disabled])').show();
