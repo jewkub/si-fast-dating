@@ -1,4 +1,5 @@
 const { name: projectId } = require('../package.json');
+const url = require('url');
 
 const express = require('express');
 const router = express.Router();
@@ -18,8 +19,8 @@ router.use(passport.session());
 
 passport.use(new GoogleStrategy({
 	clientID: process.env.GOOGLE_CLIENT_ID,
-	clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-	callbackURL: `${process.env.CALLBACK_URL || 'https://si-fast-dating.el.r.appspot.com'}/auth/google/callback`
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: url.resolve(process.env.CALLBACK_URL || 'https://si-fast-dating.el.r.appspot.com', 'auth/google/callback'),
 }, function(accessToken, refreshToken, profile, cb) {
 	// In this example, the user's Facebook profile is supplied as the user
 	// record.  In a production-quality application, the Facebook profile should

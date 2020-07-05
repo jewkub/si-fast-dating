@@ -196,7 +196,7 @@
         <br><br>
       </div>
       <div class="tab-pane fade" id="list-inbox" role="tabpanel" aria-labelledby="list-inbox-list">
-        <h3>Inbox (ขกทำละอะ)</h3>
+        <h3>Inbox (ขกทำละอะ ฝากเบสต์ทำต่อนะ)</h3>
       </div>
       <div class="tab-pane fade" id="list-profile" role="tabpanel" aria-labelledby="list-profile-list">
         <h3>Profile</h3>
@@ -260,14 +260,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js" integrity="sha256-fTuUgtT7O2rqoImwjrhDgbXTKUwyxxujIMRIK7TbuNU=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha512-I5TkutApDjnWuX+smLIPZNhw+LhTd8WrQhdCKsxCFRSvhFx2km8ZfEpNIhF9nq04msHhOkE8BMOBj5QE07yhMA==" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/8.11.8/sweetalert2.min.js" integrity="sha256-7OUNnq6tbF4510dkZHCRccvQfRlV3lPpBTJEljINxao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js" integrity="sha512-rmZcZsyhe0/MAjquhTgiUcb4d9knaFc7b5xAfju483gbEXTkeJRUMIPk6s3ySZMYUHEcjKbjLjyddGWMrNEvZg==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.31/moment-timezone.min.js" integrity="sha512-GqWOXT1UPIvzojfXEPf2ByPu4S0iwX0SfFfZ985fePNpTJPuiWKn47mXd0iyfcpcjcmM/HIRtvrd5TsR87A0Zg==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/locale/th.min.js" integrity="sha512-QbjhF6KTRUnCvuLOX876POBNeONh7ne207DDzaQ1qNcMLkpsruf4stnvX7AmgisIulVRPzg8xuZ6g+jTldNmog==" crossorigin="anonymous"></script>
   <script>
+    moment.tz.setDefault('Asia/Bangkok');
+    moment.defineLocale('th-act', {
+      parentLocale: 'th',
+      relativeTime : {
+        past: "Ongoing",
+      }
+    }); // tell moment the specific customization
+    moment.locale('th'); // but use original 'th' in general context instead
+
     let userId;
+
+    // object to validate that activity is active or not
     const isActive = {
       open: true,
       closed: true,
       cancelled: false,
       finished: false,
     }
+
+    // run when user click activity in 'join' pane
     let joinRequest = async id => {
       $('#join-form').attr('action', '/activity/join/' + id);
 
@@ -278,16 +294,16 @@
       $('#join-modal').modal('show');
 
       let data = await $.get('/activity/join/' + id);
-      console.log(data);
+      // console.log(data);
       data.forEach(e => {
         $('#join-list').append('<li>' + e.name + '</li>');
         if (e.userId == userId) $('#join-submit').attr('disabled', '');
       });
-      $('#join-submit').show();
+      $('#join-submit:not([disabled])').show();
     }
 
+    // run when user click activity in 'profile' pane
     let manageRequest = async id => {
-      // $('#manage-form').attr('action', '/profile/manage/' + id);
       $('#manage-cancel').attr('formaction', '/profile/manage/' + id + '/cancel');
       $('#manage-finish').attr('formaction', '/profile/manage/' + id + '/finish');
       $('#manage-detail').empty();
@@ -297,43 +313,60 @@
       $('#manage-modal').modal('show');
       let data = await $.get('/profile/manage/' + id);
 
-      if (!isActive[data.status]) $("#manage-cancel, #manage-finish").attr('disabled', '');
+      if (!isActive[data.status] || data.ownerId != userId) $("#manage-cancel, #manage-finish").attr('disabled', '');
+      if (moment().isAfter(moment(data.date).subtract(30, 'm'))) $('#manage-cancel').attr('disabled', '');
+      if (moment().isBefore(moment(data.date))) $('#manage-finish').attr('disabled', '');
       for (let key in data) {
         $('#manage-detail').append(`<li>${key}: ${data[key]}</li>`);
       }
 
-      $("#manage-cancel, #manage-finish").show();
+      $('#manage-cancel, #manage-finish').filter(':not([disabled])').show();
     }
 
+    // run when page is ready
     $(() => {
+      // flash for earlier response message
       $.get('/flash/success', async data => {
-        // console.log(data);
         for(e of data) {
           await swal.fire(e);
         }
       });
 
+      // get profile
       $.get('/profile', data => {
         $('#profile-name').text(data.name);
         $('#profile-email').text(data.email);
         userId = data.userId;
       });
 
+      // get all activities of that user
       $.get('/profile/activity', data => {
-        // console.log(data);
         $('#active-list').empty();
         $('#closed-list').empty();
         data.forEach(e => {
-          if (isActive[e.status]) $('#active-list').append(`<li class="list-group-item" onclick="manageRequest('${e.id}');">${e.name}</li>`);
-          else $('#closed-list').append(`<li class="list-group-item" onclick="manageRequest('${e.id}');">${e.name}</li>`);
+          if (isActive[e.status]) $('#active-list').append(`<li class="list-group-item" onclick="manageRequest('${e._id}');">${e.name}</li>`);
+          else $('#closed-list').append(`<li class="list-group-item" onclick="manageRequest('${e._id}');">${e.name}</li>`);
         });
       });
 
+      // get all activities that are still active
       $.get('/activity/get', data => {
         $('#activity-table').empty();
         data.forEach(e => {
           if (!isActive[e.status]) return ;
-          $('#activity-table').append(`<tr onclick="joinRequest('${e.id}')"><td>${e.name}</td><td>${e.owner}</td><td>${e.detail}</td><td>${e.place}</td><td>${e.date}</td><td>${e.amount}</td><td>${e.extra}</td><td>${e.category}</td></tr>`);
+
+          e.date = moment(e.date);
+          $('#activity-table').append(
+`<tr onclick="joinRequest('${e._id}')">
+  <td>${e.name}</td>
+  <td>${e.owner}</td>
+  <td>${e.detail}</td>
+  <td>${e.place}</td>
+  <td>${e.date.format('ddd, DD/MMM/YYYY, HH:mm')} <span class="badge badge-info">${e.date.locale('th-act').fromNow()}</span></td>
+  <td>${e.amount}</td>
+  <td>${e.extra}</td>
+  <td>${e.category}</td>
+</tr>`);
         });
       });
     });

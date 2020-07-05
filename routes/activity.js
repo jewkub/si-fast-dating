@@ -42,15 +42,16 @@ router.post('/activity/create', async (req, res, next) => {
     out.status = 'open';
     let newact = db.collection('Activities').doc();
     await newact.create(out);
-    await newact.collection('Members').doc().create({
-      userId: req.user.id,
+    await newact.collection('Members').doc(req.user.id).create({
+      /* userId: req.user.id,
       name: req.user.displayName,
-      email: req.user.emails[0].value,
-      ref: db.collection('Users').doc(req.user.id)
+      email: req.user.emails[0].value, */
+      ref: db.collection('Users').doc(req.user.id),
+      _id: req.user.id,
     });
-    await db.collection('Users').doc(req.user.id).collection('Activities').doc().create({
+    /* await db.collection('Users').doc(req.user.id).collection('Activities').doc().create({
       ref: newact
-    });
+    }); */
     req.flash('success', 'Create activity success');
     res.redirect('/');
   } catch (e) {
@@ -65,7 +66,7 @@ router.get('/activity/get', async (req, res, next) => {
     for (let key in data) {
       if (data[key] instanceof Firestore.Timestamp) data[key] = data[key].toDate();
     }
-    data.id = cur.ref.id;
+    data._id = cur.ref.id;
     acc.push(data);
     return acc;
   }, []);
@@ -74,37 +75,45 @@ router.get('/activity/get', async (req, res, next) => {
 
 
 router.get('/activity/join/:id', async (req, res, next) => {
-  let members = (await db.collection('Activities').doc(req.params.id).collection('Members').get()).docs;
-  let out = members.reduce((acc, cur) => {
-    let data = cur.data();
-    for (let key in data) {
-      if (data[key] instanceof Firestore.Timestamp) data[key] = data[key].toDate();
+  try {
+    let members = (await db.collection('Activities').doc(req.params.id).collection('Members').get()).docs;
+    let out = [];
+    for (let cur of members) {
+      let userDoc = cur.get('ref');
+
+      let userData = (await userDoc.get()).data();
+      for (let key in userData) {
+        if (userData[key] instanceof Firestore.Timestamp) userData[key] = userData[key].toDate();
+      }
+      userData._id = userDoc.id;
+
+      out.push(userData);
     }
-    data.id = cur.ref.id;
-    acc.push(data);
-    return acc;
-  }, []);
-  res.json(out);
+    res.json(out);
+  } catch (e) {
+    return next(e);
+  }
 });
 
 router.post('/activity/join/:id', async (req, res, next) => {
   try {
-    /* let self = await db.collection('Activities').doc(req.params.id).collection('Members').doc(req.params.id).get();
-    if (self.exists) {
-      console.log('already joined');
-      return res.redirect('/');
-    } */
-    let data = await db.collection('Activities').doc(req.params.id).get();
-    if (!isActive[data.get('status')]) throw new Error('Cannot join inactive activity');
-    await db.collection('Activities').doc(req.params.id).collection('Members').doc(req.user.id).create({
-      userId: req.user.id,
+    let actDoc = db.collection('Activities').doc(req.params.id);
+
+    let self = await actDoc.collection('Members').doc(req.user.id).get();
+    if (self.exists) throw new Error('Already joined');
+
+    let snap = await actDoc.get();
+    if (!isActive[snap.get('status')]) throw new Error('Cannot join inactive activity');
+    await actDoc.collection('Members').doc(req.user.id).create({
+      /* userId: req.user.id,
       name: req.user.displayName,
-      email: req.user.emails[0].value,
+      email: req.user.emails[0].value, */
       ref: db.collection('Users').doc(req.user.id),
+      _id: req.user.id,
     });
-    await db.collection('Users').doc(req.user.id).collection('Activities').doc().create({
-      ref: db.collection('Activities').doc(req.params.id)
-    });
+    /* await db.collection('Users').doc(req.user.id).collection('Activities').doc().create({
+      ref: actDoc
+    }); */
     req.flash('success', 'Join activity success');
     res.redirect('/');
   } catch (e) {

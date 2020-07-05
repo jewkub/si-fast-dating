@@ -6,3 +6,7 @@ handlers:
   script: auto
   secure: always
   redirect_http_response_code: 301
+
+# https://stackoverflow.com/a/54055525/4468834
+includes:
+  - env_variables.yaml

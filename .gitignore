@@ -136,5 +136,6 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
-# secret folder
+# secret folder and files
 /secret
+env_variables.yaml
