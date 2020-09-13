@@ -1,0 +1,12 @@
+runtime: nodejs10
+
+# https://cloud.google.com/appengine/docs/standard/nodejs/config/appref#handlers_secure
+handlers:
+- url: /.*
+  script: auto
+  secure: always
+  redirect_http_response_code: 301
+
+# https://stackoverflow.com/a/54055525/4468834
+includes:
+  - env_variables.yaml
