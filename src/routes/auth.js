@@ -1,5 +1,5 @@
-const { name: projectId } = require('../package.json');
 const url = require('url');
+const crypto = require('crypto');
 
 const express = require('express');
 const router = express.Router();
@@ -7,7 +7,7 @@ const router = express.Router();
 
 const Firestore = require('@google-cloud/firestore');
 const db = new Firestore({
-  projectId,
+  projectId: process.env.projectId,
 });
 
 const passport = require('passport');
@@ -49,21 +49,27 @@ passport.deserializeUser(function(obj, cb) {
 });
 
 // Endpoint to login
-router.get('/login',
+router.get('/login', (req, res, next) => {
+  const state = crypto.randomBytes(20).toString('hex');
+  req.session.state = state;
   passport.authenticate('google', {
     // hd: 'student.mahidol.edu',
+    prompt: 'consent',
 		scope: ['profile', 'email'],
     successRedirect: '/',
     failureRedirect: '/error',
     successFlash: false /* 'Login success' */,
-    failureFlash: true
-  })
-);
+    failureFlash: true,
+    state,
+  })(req, res, next);
+});
 
 router.get('/auth/google/callback',
-	passport.authenticate('google', { failureRedirect: '/login' }),
-  function(req, res) {
-    // console.log(req.user);
+  (req, res, next) => {
+    if (req.query.state != req.session.state) return next(new Error('State not correct'));
+    passport.authenticate('google', { failureRedirect: '/login' })(req, res, next);
+  },
+  (req, res, next) => {
     db.collection('Users').doc(req.user.id).set({
       userId: req.user.id,
       name: req.user.displayName,

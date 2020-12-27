@@ -1,33 +1,27 @@
-require('dotenv').config();
-console.log(process.env.CALLBACK_URL);
+import * as path from 'path';
 
+import * as dotenv from 'dotenv';
+dotenv.config();
 
-import { Secret } from './secret';
-
-import { NextFunction, Request, Response } from 'express';
 import express from 'express';
-const app = express();
-
 import * as bodyParser from 'body-parser';
-
-const port = +(process.env.PORT || 8080), ip = process.env.IP || '0.0.0.0';
-
 import session from 'cookie-session';
 import flash from 'connect-flash';
 
+import { Secret } from './secret';
 import HttpException from './exceptions/HttpException';
+
+const app = express();
+const port = +(process.env.PORT || 8080), ip = process.env.IP || '0.0.0.0';
 
 (async () => {
   await Secret.load();
+  process.env.projectId = 'si-fast-dating';
 
-  // set up routes
+  // initialize middleware
   app.set('trust proxy', true);
-
-  // parse application/x-www-form-urlencoded
   app.use(bodyParser.urlencoded({ extended: false }));
-  // parse application/json
   app.use(bodyParser.json());
-
   app.use(session({
     name: 'session',
     secret: process.env.SESSION_SECRET,
@@ -35,39 +29,36 @@ import HttpException from './exceptions/HttpException';
     /* saveUninitialized: false,
     resave: true */
   }));
-
   app.use(flash());
   app.get('/flash/:event', async (req, res, next) => {
     let message = req.flash(req.params.event);
     res.json(message);
   });
 
+  // routes
   app.use('/', require('./routes/auth.js'));
   app.use('/', require('./routes/profile.js'));
   app.use('/', require('./routes/activity.js'));
 
   app.get('/', async (req, res, next) => {
     if (!req.user) return res.redirect('/login');
-    res.sendFile(__dirname + '/public/html/index.html');
+    res.sendFile(path.resolve(__dirname, '..',  'public/html/index.html'));
   });
 
   app.get('/error', (req, res) => {
     res.send('login error');
   });
-  app.use(express.static('public'));
+  app.use(express.static('./public'));
 
-  function errorMiddleware(error: HttpException, request: Request, response: Response, next: NextFunction) {
+  app.use((error: HttpException, req: express.Request, res: express.Response, next: express.NextFunction) => {
     const status = error.status || 500;
-    const message = error.message || 'Something went wrong';
-    response
-      .status(status)
-      .send({
-        message,
-        status,
-      });
-  }
-
-  app.use(errorMiddleware);
+    const message = error.message || 'Error';
+    console.log(error.message);
+    res.status(status).send({
+      message,
+      status,
+    });
+  });
 
   app.listen(port, ip, () => console.log('Server running on http://%s:%s', ip, port));
 

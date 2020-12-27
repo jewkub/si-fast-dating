@@ -1,11 +1,9 @@
-const { name: projectId } = require('../package.json');
-
 const express = require('express');
 const router = express.Router();
 
 const Firestore = require('@google-cloud/firestore');
 const db = new Firestore({
-  projectId,
+  projectId: process.env.projectId,
 });
 
 const moment = require('moment-timezone');

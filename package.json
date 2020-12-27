@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
-    "build": "tsc --project ./",
-    "start": "ts-node src/server.ts",
+    "build": "tsc --project ./ --allowJs",
+    "start": "ts-node --files src/server.ts",
     "predeploy": "yarn build",
     "deploy": "gcloud app deploy --project=si-fast-dating"
   },
@@ -20,9 +19,7 @@
     "moment": "^2.27.0",
     "moment-timezone": "^0.5.31",
     "passport": "^0.4.1",
-    "passport-google-oauth20": "^2.0.0",
-    "react": "17.0.1",
-    "react-dom": "17.0.1"
+    "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
     "@types/connect-flash": "^0.0.36",
