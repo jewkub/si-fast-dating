@@ -1,0 +1,28 @@
+{
+  "name": "si-fast-dating",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node server.js",
+    "build": "next build",
+    "prestart": "next build",
+    "start": "NODE_ENV=production node server.js",
+    "predeploy": "next build",
+    "deploy": "gcloud app deploy --project=si-fast-dating"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^4.0.0",
+    "body-parser": "^1.19.0",
+    "connect-flash": "^0.1.1",
+    "cookie-session": "^1.4.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "moment": "^2.27.0",
+    "moment-timezone": "^0.5.31",
+    "next": "9.4.4",
+    "passport": "^0.4.1",
+    "passport-google-oauth20": "^2.0.0",
+    "react": "16.13.1",
+    "react-dom": "16.13.1"
+  }
+}
