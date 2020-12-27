@@ -1,21 +1,24 @@
 require('dotenv').config();
-const express = require('express');
+console.log(process.env.CALLBACK_URL);
+
+
+import { Secret } from './secret';
+
+import { NextFunction, Request, Response } from 'express';
+import express from 'express';
 const app = express();
 
-const next = require('next');
-const dev = process.env.NODE_ENV !== 'production';
-const nextApp = next({ dev });
+import * as bodyParser from 'body-parser';
 
-const bodyParser = require('body-parser');
+const port = +(process.env.PORT || 8080), ip = process.env.IP || '0.0.0.0';
 
-const port = +process.env.PORT || 8080, ip = process.env.IP || '0.0.0.0';
+import session from 'cookie-session';
+import flash from 'connect-flash';
 
-const passport = require('passport');
-const session = require('cookie-session');
-const flash = require('connect-flash');
+import HttpException from './exceptions/HttpException';
 
 (async () => {
-  await nextApp.prepare();
+  await Secret.load();
 
   // set up routes
   app.set('trust proxy', true);
@@ -28,9 +31,7 @@ const flash = require('connect-flash');
   app.use(session({
     name: 'session',
     secret: process.env.SESSION_SECRET,
-    cookie: {
-      expires: new Date(2147483647000) // Tue, 19 Jan 2038 03:14:07 GMT
-    },
+    expires: new Date(2147483647000), // Tue, 19 Jan 2038 03:14:07 GMT
     /* saveUninitialized: false,
     resave: true */
   }));
@@ -46,21 +47,27 @@ const flash = require('connect-flash');
   app.use('/', require('./routes/activity.js'));
 
   app.get('/', async (req, res, next) => {
-    if (!req.user || !req.user.id) return res.redirect('/login');
+    if (!req.user) return res.redirect('/login');
     res.sendFile(__dirname + '/public/html/index.html');
-    // nextApp.render(req, res, '/index');
   });
 
   app.get('/error', (req, res) => {
     res.send('login error');
   });
-  app.get('*', (req, res) => nextApp.getRequestHandler()(req, res));
+  app.use(express.static('public'));
 
-  app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).send(err.message);
-    // res.redirect('/');
-  });
+  function errorMiddleware(error: HttpException, request: Request, response: Response, next: NextFunction) {
+    const status = error.status || 500;
+    const message = error.message || 'Something went wrong';
+    response
+      .status(status)
+      .send({
+        message,
+        status,
+      });
+  }
+
+  app.use(errorMiddleware);
 
   app.listen(port, ip, () => console.log('Server running on http://%s:%s', ip, port));
 
