@@ -1,4 +1,4 @@
-runtime: nodejs10
+runtime: nodejs12
 
 # https://cloud.google.com/appengine/docs/standard/nodejs/config/appref#handlers_secure
 handlers:

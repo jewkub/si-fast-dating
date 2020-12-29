@@ -42,13 +42,13 @@ const port = +(process.env.PORT || 8080), ip = process.env.IP || '0.0.0.0';
 
   app.get('/', async (req, res, next) => {
     if (!req.user) return res.redirect('/login');
-    res.sendFile(path.resolve(__dirname, '..',  'public/html/index.html'));
+    res.sendFile(path.resolve('./static/public/html/index.html'));
   });
 
   app.get('/error', (req, res) => {
     res.send('login error');
   });
-  app.use(express.static('./public'));
+  app.use(express.static('./static/public'));
 
   app.use((error: HttpException, req: express.Request, res: express.Response, next: express.NextFunction) => {
     const status = error.status || 500;
