@@ -16,10 +16,10 @@
     functional-red-black-tree "^1.0.1"
     google-gax "^2.9.2"
 
-"@google-cloud/secret-manager@^3.2.3":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-3.2.3.tgz#2d66a346161c5ec4cf024852ab12117908322b2a"
-  integrity sha512-flrvKArtYh4KmjaSwvXDrcGmT0dhdA8i7U9ohdIYNVv7FwffFSWT6YkJXmTj1MAg8hKp23D+1FFEdxE26GkZCg==
+"@google-cloud/secret-manager@^3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@google-cloud/secret-manager/-/secret-manager-3.3.0.tgz#a134705e97998458b4e74096b6a9e2cf24b661ce"
+  integrity sha512-v4N4Kj+TpSboHxHyOuqk28wTAx79Nj5rUlvU+ySzE5+cgkAILMbM0e+QkjkvXWzwP41q7rAUM1cccQ2z9qtolg==
   dependencies:
     google-gax "^2.9.2"
 
